@@ -2,7 +2,8 @@
 
 import numpy as np
 
-from myCct import xy_to_cct
+from .myCct import xy_to_cct
+
 
 CIE_DEFAULT_ILLUMINANT = "E"
 CIE_STANDARD_EPSILON = 0.00885645

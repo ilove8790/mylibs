@@ -5,6 +5,7 @@ from matplotlib.colors import ListedColormap
 from matplotlib.colors import LinearSegmentedColormap
 from PySide6.QtGui import QColor
 
+
 # 백색 기준 광원
 MY_STANDARD_WHITE_SOURCE = "E"
 

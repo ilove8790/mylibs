@@ -1,8 +1,6 @@
 # myColorVision.py
 
-
 import numpy as np
-
 
 
 class Luminous_Efficiency:

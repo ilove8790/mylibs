@@ -1,5 +1,4 @@
 # mySegmentation.py
-# version="0.2.240829"
 
 
 import numpy as np

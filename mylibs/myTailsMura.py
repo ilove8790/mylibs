@@ -3,12 +3,12 @@
 import numpy as np
 
 from typing import Literal
-from myCommon import get_colorname_from_wavelength
-from myColorVision import (
+from .myCommon import get_colorname_from_wavelength
+from .myColorVision import (
     Wavelength_JND_by_zhaoping_2011,
     Luminous_Efficiency,
 )
-from mySegmentation import (
+from .mySegmentation import (
     Segmentation,
     SegmentationWithDiagonal,
 )
