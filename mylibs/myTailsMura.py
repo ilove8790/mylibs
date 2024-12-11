@@ -14,9 +14,10 @@ from .mySegmentation import (
 )
 
 
-class TailsMura:
+class Wavelength_TailsMura:
     """ 파장 치우침 비율 계산
-        상하좌우대각연결점, 상하위 최대값 기준
+    - 상하좌우대각 최인접 연결면적 기준
+    - 최종결과는 상하위비율의 합계로 결정
     """
 
     def __init__(self, array=None|np.ndarray):
