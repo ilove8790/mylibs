@@ -803,7 +803,7 @@ class DominantWavelength:
     def calc_dxdy(self):
         dx1nm = self.x1nm - self.white_x
         dy1nm = self.y1nm - self.white_y
-        self.atan1nmrad = np.atan2(dx1nm, dy1nm) # xy를 swap해서 적용(atan2함수를 증가방향으로 적용하기 위함)
+        self.atan1nmrad = np.arctan2(dx1nm, dy1nm) # xy를 swap해서 적용(atan2함수를 증가방향으로 적용하기 위함)
 
 
     def set_userwhite(self, white_x: float, white_y: float):
@@ -829,10 +829,10 @@ class DominantWavelength:
         xw, yw = self.white_x, self.white_y  # 원점
         dx, dy = x - xw, y - yw  # 거리
 
-        rad_over = np.atan2(self.x1nm[-1]-xw, self.y1nm[-1]-yw)  # magenta 영역 (830nm이상 파장의 rad값)
-        rad_under = np.atan2(self.x1nm[0]-xw, self.y1nm[0]-yw)  # magenta area (360nm이하파장의 rad값)
+        rad_over = np.arctan2(self.x1nm[-1]-xw, self.y1nm[-1]-yw)  # magenta 영역 (830nm이상 파장의 rad값)
+        rad_under = np.arctan2(self.x1nm[0]-xw, self.y1nm[0]-yw)  # magenta area (360nm이하파장의 rad값)
 
-        rad = np.atan2(dx, dy) # xy를 swap해서 적용(atan2함수를 증가방향으로 적용하기 위함)
+        rad = np.arctan2(dx, dy) # xy를 swap해서 적용(atan2함수를 증가방향으로 적용하기 위함)
         magenta_mask = np.where(rad > rad_over, -1, 1) * np.where(rad < rad_under, -1, 1)  # magenta 파장은 -1, 그외는 1
         rad = np.where(rad > rad_over, rad - np.pi, rad)
         rad_final = np.where(rad < rad_under, rad + np.pi, rad)
