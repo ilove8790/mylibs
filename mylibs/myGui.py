@@ -325,6 +325,191 @@ class MyTableWidget(QTableWidget):
             self.label_corner = QLabel("", self)
         self.label_corner.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_corner.setStyleSheet("font-weight: bold;")
+        self.label_corner.setGeometry(0, 0, 
+            self.verticalHeader().width(), self.horizontalHeader().height()
+        )
+
+        # 테이블 선택시 열 단위로 셀 값을 클립보드에 복사
+        def copy_selected_cells():
+            selected_items = self.selectedItems()
+            selected_values = [item.text() for item in selected_items]
+            copied_text = '\n'.join(selected_values)
+            QApplication.clipboard().setText(copied_text)
+
+        self.itemSelectionChanged.connect(copy_selected_cells)
+        self.itemClicked.connect(copy_selected_cells)
+
+
+    def set_table_style(self, style_sheet):
+        """테이블의 스타일을 설정"""
+        self.setStyleSheet(style_sheet)
+
+
+    def set_column_name(self, column_index, new_name):
+        item = QTableWidgetItem(str(new_name))
+        self.setHorizontalHeaderItem(column_index, item)
+
+
+    def set_row_name(self, row_index, new_name):
+        item = QTableWidgetItem(str(new_name))
+        self.setVerticalHeaderItem(row_index, item)
+
+
+    def set_cell_value(self, row, col, value, align: Literal["center", "left", "right"]="center"):
+        """셀에 값과 문자 정렬을 설정"""
+        item = QTableWidgetItem(str(value))
+        self.setItem(row, col, item)
+        self.set_cell_align(row, col, align)
+
+
+    def get_cell_value(self, row, col) -> str:
+        """셀의 값을 반환"""
+        item = self.item(row, col)
+        return item.text() if item else ""
+
+
+    def set_cell_align(self, row, col, align: Literal["center", "left", "right"]="center"):
+        """셀의 문자 정렬 설정(align 기본값은 center)"""
+        item = self.item(row, col)
+        if item is not None:
+            align_flag = Qt.AlignmentFlag.AlignCenter
+            if align == "left":
+                align_flag = Qt.AlignmentFlag.AlignLeft
+            elif align == "right":
+                align_flag = Qt.AlignmentFlag.AlignRight
+
+            item.setTextAlignment(align_flag | Qt.AlignmentFlag.AlignVCenter)
+
+
+    def set_cell_editable(self, row, col, value, align: Literal["center", "left", "right"]="center"):
+        """셀에 값과 문자 정렬을 설정"""
+        item = QTableWidgetItem(str(value))
+        self.setItem(row, col, item)
+        self.set_cell_align(row, col, align)
+
+
+    def set_column_width(self, col_index: int, width: int):
+        """"특정 열의 폭을 설정(width=0: 자동)"""
+        self.setColumnWidth(col_index, width)
+
+
+    def set_column_visible(self, col_index, hide: bool):
+        """특정 열의 보임/숨김을 설정"""
+        self.hideColumn(col_index) if hide else self.showColumn(col_index)
+
+
+    def set_corner_label(self, corner_text: str="",
+                         fgcolor: str="", bgcolor: str="",
+                         align: Literal["center", "left", "right"]="center"):
+        qalign = Qt.AlignmentFlag.AlignCenter
+        if align == "left":
+            qalign = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        elif align == "right":
+            qalign = Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+
+        palette = QPalette()
+        palette.setColor(QPalette.ColorRole.Window, MY_COLOR_MAPPING['white'])
+        palette.setColor(QPalette.ColorRole.WindowText, MY_COLOR_MAPPING['black'])
+        if fgcolor in MY_COLOR_MAPPING.keys():
+            palette.setColor(QPalette.ColorRole.WindowText, MY_COLOR_MAPPING[fgcolor])
+        if bgcolor in MY_COLOR_MAPPING.keys():
+            palette.setColor(QPalette.ColorRole.Window, MY_COLOR_MAPPING[bgcolor])
+
+        self.label_corner.setAlignment(qalign)
+        self.label_corner.setText(corner_text)
+        self.label_corner.setAutoFillBackground(True)
+        self.label_corner.setPalette(palette)
+
+
+    def update_table(self, data: list, align: Literal["center", "left", "right"]="center"):
+        """셀의 값을 모두를 한번에 갱신"""
+        # nrows, ncols = self.rowCount(), self.columnCount()
+        for row, row_data in enumerate(data):
+            for col, value in enumerate(row_data):
+                self.set_cell_value(row, col, value, align)
+                # item = QTableWidgetItem(cell)
+                # self.set_cell_align(row, col, align=align)
+                # self.setItem(row, col, item)
+
+
+
+class MyTableWidget_Editable(QTableWidget):
+    """
+    QTableWidget을 기반으로 사용자 정의 클래스를 만들어,
+    칼럼 헤더와 행 헤더를 리스트 형태로 받아 테이블의 행, 열을 자동으로 설정하고,
+    각 셀의 값을 수정하고, 테이블 스타일을 지정할 수 있다.
+    """
+    def __init__(self, column_headers=None, row_headers=None, corner_text=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # 칼럼 및 행 헤더 리스트가 제공되면 테이블의 크기를 설정
+        if column_headers:
+            self.setColumnCount(len(column_headers))
+            self.setHorizontalHeaderLabels(column_headers)
+            self.horizontalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
+        else:
+            self.setColumnCount(1)
+            # self.horizontalHeader().hide()
+            self.horizontalHeader().setVisible(False)
+
+        if row_headers:
+            self.setRowCount(len(row_headers))
+            self.setVerticalHeaderLabels(row_headers)
+            self.verticalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
+        else:
+            self.setRowCount(1)
+            # self.verticalHeader().hide()
+            self.verticalHeader().setVisible(False)
+
+        # # 열, 행 헤더를 중앙 정렬로 설정
+        # for row in range(self.rowCount()):
+        #     for col in range(self.columnCount()):
+        #         self.set_cell_align(row, col, "center")
+        #         # cell_item = self.item(row, col)
+        #         # cell_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+        #         # self.setItem(row, col, cell_item)
+
+        # 셀 크기 설정
+        self.resizeColumnsToContents()
+        self.resizeRowsToContents()
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        self.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        # self.verticalHeader().setStretchLastSection(True)
+
+        # 테이블 셀 선택 설정
+        self.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectColumns)
+        # self.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectItems)
+        self.setEditTriggers(QTableWidget.EditTrigger.DoubleClicked)
+
+        # 테이블 테두리 및 행번호 숨기기
+        self.setShowGrid(False)#True)
+        # self.setGridStyle(Qt.PenStyle.NoPen)#.SolidLine)  # Qt::PenStyle::DotLine
+        # self.verticalHeader().setVisible(False)
+
+        # 기본 스타일 설정
+        self.setStyleSheet("""
+            QTableWidget { border: none; }
+            QTableWidget::item {padding-left: 2px; padding-right: 2px; }
+            QHeaderView::section {background-color: whitesmoke; border: none}
+            """)
+            # "QHeaderView::section:vertical {background-color: transparent; }", # 마지막 헤더 이후 영역의 색상 제거
+        # self.horizontalHeader().setStyleSheet("""
+        #     QHeaderView::section:horizontal { border: none; }
+        #         # border-top: none; border-bottom: none;  #1px solid lightgrey;
+        #         # border-left: none; border-right: none; }
+        #     """)
+        # self.verticalHeader().setStyleSheet("""
+        #     QHeaderView::section:vertical {
+        #         border-top: none; border-bottom: none;
+        #         border-left: none; border-right: 1px solid lightgrey; }
+        #     """)
+        if corner_text:
+            self.label_corner = QLabel(corner_text, self)
+        else:
+            self.label_corner = QLabel("", self)
+        self.label_corner.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_corner.setStyleSheet("font-weight: bold;")
         self.label_corner.setGeometry(
             0, #self.verticalHeader().width(),  # 시작위치 X
             0, #self.horizontalHeader().height(),  # 시작위치 Y

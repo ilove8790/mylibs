@@ -1,13 +1,5 @@
 # ---> Python
 
-# schlee skips
-.vscode/
-.ruff_cache/
-test/
-test_*.*
-*.key
-*.backup
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -169,4 +161,11 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-matool_release.cmd
+# schlee skips
+.gitignore
+.vscode/
+.ruff_cache/
+test/
+test_*.*
+*.key
+*.backup
